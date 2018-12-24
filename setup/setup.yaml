@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: ACG AppSync
+
+Resources:
+
+  AppSyncLogRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ["-", ["role", !Ref "AWS::StackName", "appsync", "cloudwatch"]]
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - appsync.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSAppSyncPushToCloudWatchLogs
+      Path: /
+
+  AppSyncDataRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ["-", ["role", !Ref "AWS::StackName", "appsync", "data"]]
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - appsync.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies: 
+        - 
+          PolicyName: !Join ["-", ["pol", !Ref "AWS::StackName", "appsync", "dynamodb"]]
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement: 
+              - 
+                Sid: QuizBizQuestionTable
+                Effect: "Allow"
+                Action:
+                  - dynamodb:BatchGetItem
+                  - dynamodb:BatchWriteItem
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:GetItem
+                  - dynamodb:Scan
+                  - dynamodb:Query
+                  - dynamodb:UpdateItem
+                Resource:
+                  - arn:aws:dynamodb:*:*:table/QuizBizQuestion
+                  - arn:aws:dynamodb:*:*:table/QuizBizQuestion/*
+                  - arn:aws:dynamodb:*:*:table/QuizBizQuestions
+                  - arn:aws:dynamodb:*:*:table/QuizBizQuestions/*
+      Path: /
+
+  QuizTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - 
+          AttributeName: "id"
+          AttributeType: "S"
+      KeySchema:
+        - 
+          AttributeName: "id"
+          KeyType: "HASH"
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: QuizBizQuestions
