@@ -1,2 +1,8 @@
 aws-exports.js
-
+.amplifyrc
+/amplify
+/node_modules
+/build
+/coverage
+quizbiz/build
+quizbiz/node_modules
